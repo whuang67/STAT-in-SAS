@@ -68,7 +68,7 @@ proc logistic data=liverFemale_3rd noprint;
   where Gender = "Female" and
         cb_1st lt 0.2 and
         cb_2nd lt 0.15 and
-        cb_3rd lt 0.1;;
+        cb_3rd lt 0.1;
 run;
 
 /* Re-selection the predictors */
