@@ -226,3 +226,30 @@ proc reg data=sasuser.b_fitness;
      COLLINOINT: NOT INCLUDE intercept */
 run;
 quit;
+
+
+* Categorical Data;
+proc format;
+  value purfmt 1 = '$100+'
+               0 = '<$100';
+run;
+proc freq data=sasuser.b_sales;
+  tables purchase gender income age gender*purchase income*purchase;
+  format purchase purfmt.;
+run;
+
+/* Ordering values */
+data b_sales_inc;
+  set sasuser.b_sales;
+  inclevel = 1*(income='Low') + 2*(income='Medium') + 3*(income='High');
+run;
+proc format;
+  value incfmt 1='Low Income'
+               2='Medium Income'
+               3='High Income';
+run;
+proc freq data = b_sales_inc;
+  tables inclevel*purchase;
+  format inclevel incfmt.
+         purchase purfmt.;
+run;
