@@ -42,3 +42,48 @@ run;
 
 * Type I error ALPHA: H0 is true but rejected.
   Type II error BETA: H0 is false but not rejected. ;
+
+* Hypothesis Test;
+proc univariate data=sasuser.b_rise mu=15;
+  var weight;
+run;
+
+* pre analysis of ANOVA;
+proc univariate data = sasuser.b_cereal;
+  class brand;
+  var weight;
+  probplot weight / normal (mu=est sigma=est color=blue w=1);
+run;
+proc sort data = sasuser.b_cereal out = b_cereal;
+  by brand;
+run;
+proc boxplot data = b_cereal;
+  plot weight*brand / cboxes=black boxstyle=schematic;
+run;
+
+* PROC GLM: ANOVA;
+options ls=75 ps=45;
+proc glm data = sasuser.b_cereal;
+  class brand;
+  model  weight=brand;
+  means brand / hovtest;
+  /* HOVTEST: performs Levene's test for homogeneity of variances
+     WELCH: is used if variances are not equal */
+  output out=check r=resid p=pred;
+run;
+quit;
+
+goptions reset=all;
+proc gplot data = check;
+  plot resid*pred / haxis=axis1 vaxis=axis2 vref=0;
+  symbol v=star h=3pct;
+  axis1 w=2 major=(w=2) minor=none offset=(10pct);
+  axis2 w=2 major=(w=2) minor=none;
+run;
+quit;
+
+proc univariate data = check normal;
+  var resid;
+  histogram resid / normal;
+  probplot resid / normal (mu=est sigma=est color=blue w=1);
+run;
