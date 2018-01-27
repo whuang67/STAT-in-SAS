@@ -128,3 +128,25 @@ data _null_;
 0 3 6 9 12
 ;
 run;
+
+options ps=50 ls=76;
+goptions reset=all fontres=presentation ftext=swissb htext=1.5;
+proc reg data=predoxy;
+/* LINEPRINTER: creates plots requested as line printer plots */
+  model oxygen_consumption = performance / clm cli alpha=0.05;
+  /* CLM: produces all P option output, plus standard errors of the predicted values, and upper and lower 95% ci 
+          bounds for the mean at each value of the predictor variable.
+     CLI: produces all P option output, plus standard errors of the predicted values, and upper and lower 95% ci
+          bounds at each value of the predictor variable. */
+  id name performance;
+  plot oxygen_consumption*performance / conf pred;
+  /* CONF: requests overlaid plots of confidence intervals. 
+     PRED: requests overlaid plots of prediction intervals */
+  symbol1 c=red v=dot;
+  symbol2 c=red;
+  symbol3 c=blue;
+  symbol4 c=blue;
+  symbol5 c=green;
+  symbol6 c=green;
+run;
+quit;
