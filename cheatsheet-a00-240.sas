@@ -96,3 +96,35 @@ proc corr data=sasuser.b_fitness rank; /* RANK: orders the correlations from hig
   /* If WITH statement is not specified, we get correlation coefficient matrix.
      If WITH statement is specified, the WITH specifies the row variables. */
 run;
+
+* REG: regression;
+proc reg data = sasuser.b_fitness;
+  model oxygen_consumption = performance;
+run;
+quit;
+/* Coefficient of variation = RMSE/Y-bar * 100% */
+
+data need_predictions;
+  input performance @@;
+  datalines;
+0 3 6 9 12
+;
+run;
+data predoxy;
+  set sasuser.b_fitness need_predictions;
+run;
+proc reg data = predoxy;
+  model oxygen_consumption = performance / p;
+  /* P: prints the values of response variable, the predicted values and residuals */
+  id performance;
+  /* ID: specifies a variable to label observations */
+run;
+
+data _null_;
+  input performance @@;
+  oxygen_consumption = 35 + 1.4*performance;
+  put performance= oxygen_consumption=;
+  datalines;
+0 3 6 9 12
+;
+run;
