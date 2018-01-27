@@ -87,3 +87,12 @@ proc univariate data = check normal;
   histogram resid / normal;
   probplot resid / normal (mu=est sigma=est color=blue w=1);
 run;
+
+* PROC CORR; 
+proc corr data=sasuser.b_fitness rank; /* RANK: orders the correlations from highest to lowest in absolute value.
+                                          NOSIMPLE: suppresses printing simple descriptive statistics. */
+  var runtime age weight run_pulse rest_pulse maximum_pulse performance;
+  with oxygen_consumption;
+  /* If WITH statement is not specified, we get correlation coefficient matrix.
+     If WITH statement is specified, the WITH specifies the row variables. */
+run;
