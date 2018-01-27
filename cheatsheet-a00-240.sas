@@ -150,3 +150,13 @@ proc reg data=predoxy;
   symbol6 c=green;
 run;
 quit;
+
+* Multivariate Linear Regression;
+proc reg data=sasuser.b_fitness;
+  model oxygen_consumption = performance runtime age weight run_pulse rest_pulse maximum_pulse / selection=rsquare adjrsq cp best=4;
+  /* SELECTION: enables you to choose the different selection methods 
+     RSQUARE: tells PROC REG to use model's R-square to rank the models from best to worst
+     ADJRSQ: prints the Adjusted R-square for each model
+     CP: prints Mallows' Cp statistics for each model
+     BEST=n: limits the output to only the best n models for a fixed number of variables. */
+run;
