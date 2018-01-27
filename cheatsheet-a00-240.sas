@@ -167,3 +167,62 @@ proc reg data=sasuser.b_fitness;
   PREDICT: model oxygen_consumption = runtime age run_pulse rest_pulse;  /* Cp < p*/
   EXPLAIN: model oxygen_consumption = runtime age run_pulse rest_pulse maximum_pulse; /* Cp < 2p-p_full+1 */
 run;
+
+
+* Dignostic Plots ;
+options ps=50 ls=97;
+goptions reset=all fontres=presentation ftext=swissb htext=1.5;
+proc reg data = sasuser.b_fitness;
+  PREDICT: model oxygen_consumption = runtime age run_pulse maximum_pulse;
+  plot r.*(p. runtime age run_pulse maximum_pulse);
+  plot student. * obs. / vref=3 2 -2 -3
+                         haxis=0 to 32 by 1;  /* VREF: specifies where reference lines are to appear
+                                                 HAXIS: specifies range and tick marks for the horizontal axis */
+  plot student. * nqq.;
+  /* R.: residuals
+     P.: predicted values
+     STUDENT.: student residuals
+     NQQ.: normal quantile values
+     OBS.: observation number in the dataset*/
+  symbol v=dot;
+run;
+quit;
+
+
+* Influencial points;
+goptions reset=all
+proc reg data=sasuser.b_fitness;
+  PREDICT: model oxygen_consumption = runtime age run_pulse maximum_pulse / r influence;
+  /* R: prints STUDENT residuals and Cook's Distance
+     INFLUENCE: prints RSTUDENT residuals and DFFITS */
+  id name;
+  output out=ck4outliers rstudent=rstud dffits=dfits cookd=cooksd;
+  /* |DFFITS| > 2*sqrt(p/n), where p includes intercept
+     Rstudent residuals: studentized residual with the i-th observation removed */
+run;
+quit;
+
+%let numparams=5; *p;
+%let numobs=32; *n;
+data influential;
+  set ck4outliers;
+  cutdffits = 2*sqrt(&numparams/&numobs);
+  cutcooksd = 4/&numobs;
+  
+  rstud_i = (abs(rtuid) > 3);
+  dfits_i = (abs(dfits) > cutdffits);
+  cookd_i = (cooksd > cutcooksd);
+  sum_i = rstud_i + dfits_i + cookd_i;
+  if sum_i > 0;
+run;
+
+
+* Collinearity;
+/* Large R-square and F is highly significant. But few parameters are significant. */
+proc reg data=sasuser.b_fitness;
+  model oxygen_consumption = performance runtime age weight run_pulse rest_pulse maximum_pulse / vif collin collinoint;
+  /* VIF: Variance Inflation Factor 
+     COLLIN: generates condition indices and variance proportion statistics INCLUDE intercept 
+     COLLINOINT: NOT INCLUDE intercept */
+run;
+quit;
