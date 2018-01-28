@@ -253,3 +253,42 @@ proc freq data = b_sales_inc;
   format inclevel incfmt.
          purchase purfmt.;
 run;
+
+
+* Contengency Table -- Chi-Square;
+proc freq data =  sasuser.b_sales_inc;
+  tables gender*purchase / chisq expected cellchi2 nocol nopercent;
+  /* CHISQ: produces Chi-square test of association
+     EXPECTED: prints the expected cell frequencies under the hypothesis of no assiciation
+     CELLCHI2: print each cell's contribution to the total Chi-square statistics
+     NOCOL: suppress printing the column percentages
+     NOPERCENTAGE: suppress printing the cell percentages */
+run;
+
+* Exact p-value;
+proc freq data = sasuser.b_exact;
+  tables a*b;
+  exact pchi;
+  /* EXACT: produce exact p-values for the statistics listed as keywords */
+  /* PCHI: request exact p-value for the chi-square statistic, including Cramer's V and other related statistics */
+run;
+
+* Spearman correlation statistic;
+proc freq data = sasuser.b_sales_inc;
+  tables inclevel*purchase / chisq measures cl;
+  /* CHISQ: produces the Pearson chi-square, the likelihood-ratio chi-square, and the Mantel-Haenszel chi-square
+     MEASURES: produces the Spearman correlation statistic
+     CL: produces confidence bounds for the MEASURES statistics */
+  format inclevel incfmt.
+         purchase purfmt.;
+run;
+
+
+* LOGISTIC: Logistic Regression;
+proc logistic data = sasuser.b_sales_inc;
+  class gender (param=ref ref='Male');
+  /* PARAM: specifies the parameterization method for the classification variable(s) */
+  model purchase(event='1')=gender / clodds=pl;
+  /* EVENT: specifies the event category for binary response model
+     CLODDS=PL: requests profile likelihood confidence intervals */
+run;
