@@ -89,3 +89,30 @@ proc glm data = dataset;
   class c1;
   model y = x1 x2 x3 c1 / solution;
 run;
+
+* Imputation - STDIZE statement;
+data develop1;
+  set develop;
+  array mi{*} MIAcctAg MIPhone MIPOS MIPOSAmt
+              MIInv MIInvBal MICC MICCBal
+              MICCPurc MIIncome MIHMOwn MILORes
+              MIHMVal MIAge MICRScor;
+  array x{*} acctage phone pos posamt
+             inv invbal cc ccbal
+             ccpurc income hmown lores
+             hmval age crscore;
+  do i=1 to dim(mi);
+    mi{i}=(x{i}=.);
+  end;
+run;
+proc stdize data = develop1;
+            reponly
+            method = median
+            out = imputed;
+  var acctage phone pos posamt
+      inv invbal cc ccbal
+      ccpurc income hmown lores
+      hmval age crscore;
+run;
+
+/* PROC STANDARD with REPLACE option to impute with mean values */
