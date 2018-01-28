@@ -6,13 +6,32 @@ proc logistic data = develop des;
   units ddabal = 1000 depamt = 1000;
 run;
 
-* SCORE statement;
+* SCORE statement -- Making predictions: P_1;
+/* Method 1 */
 proc logistic data = develop des;
   model ins = dda ddabal dep depamt cashbk checks;
   score data = pmlr.new out = scored;
 run;
 proc print data = scored (obs=20);
   var P_1 dda ddabal dep depamt cashbk checks;
+run;
+
+/* Method 2 */
+proc logistic data = develop des outest = betas1;
+  model ins = dda ddabal dep depamt cashbk checks;
+run;
+proc score data = pmlr.new    /* This is a procedure that return the raw response (logit) */
+           out = scored;
+           score = betas1;
+           type = parms;
+  var dda ddabal dep depamt cashbk checks;
+run;
+data scored;
+  set scored;
+  p = 1/(1+exp(-ins));
+run;
+proc print data = scored (obs=20);
+  var p dda ddabal dep depamt cashbk checks;
 run;
 
 * SURVEYSELECT;
