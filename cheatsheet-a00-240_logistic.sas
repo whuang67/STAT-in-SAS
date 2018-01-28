@@ -34,6 +34,14 @@ proc print data = scored (obs=20);
   var p dda ddabal dep depamt cashbk checks;
 run;
 
+/* Oversampling, proportion of the target event is 0.02 not 0.3 */
+%let pi1 = 0.02;
+proc logistic data = develop des;
+  var dda ddabal dep depamt cashbk checks;
+  score data = pmlr.new out = scored priorevent = &pi1;
+run;
+
+
 * SURVEYSELECT;
 proc sort data=abc;
   by country;
