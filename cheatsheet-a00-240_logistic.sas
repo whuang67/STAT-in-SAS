@@ -116,3 +116,19 @@ proc stdize data = develop1;
 run;
 
 /* PROC STANDARD with REPLACE option to impute with mean values */
+
+
+* Logistic Regression -- with prediction;
+proc logistic data = train des;
+  model response = predictor1 predictor2;
+  score data = test
+        output = prediction
+        priorevent = 0.2
+        outroc = roc;
+run;
+proc print data = roc;
+  var _prob_ _sensit_ _1mspec_;
+  /* _PROB_: raw probability
+     _SENSIT_: sensitivity
+     _1MSPEC_: 1 - specificity */
+run;
